@@ -1,0 +1,44 @@
+PROJECT(CoolAnt)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.0)
+
+# 1. add c++11 support, if no then exit
+INCLUDE(CheckCXXCompilerFlag)
+CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
+CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
+CHECK_CXX_COMPILER_FLAG("-std=c++14" COMPILER_SUPPORTS_CXX14)
+
+IF(COMPILER_SUPPORTS_CXX14)
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
+ELSEIF(COMPILER_SUPPORTS_CXX11)
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+ELSEIF(COMPILER_SUPPORTS_CXX0X)
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
+ELSE()
+    MESSAGE(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
+ENDIF()
+
+# 2. check build mode and validate COOLANT_DEBUG
+IF(DEFINED COOLANT_DEBUG)
+    IF(((COOLANT_DEBUG GREATER 0) OR (COOLANT_DEBUG EQUAL 0)) AND ((COOLANT_DEBUG LESS 10) OR (COOLANT_DEBUG EQUAL 10)))
+        SET(CMAKE_BUILD_TYPE "Debug")
+        SET(CMAKE_CXX_FLAGS_DEBUG "$ENV{CXXFLAGS} -Wall -Wextra -Wunused -g3 -ggdb3 -pedantic -Werror -DMIR2X_DEBUG=${COOLANT_DEBUG}")
+    ELSE()
+        MESSAGE(FATAL_ERROR "Invalid COOLANT_DEBUG, should be digits in [0, 10]")
+    ENDIF()
+ELSE()
+    SET(CMAKE_BUILD_TYPE "Release")
+    SET(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -O3 -Wall")
+ENDIF()
+
+# 3. set common source used in client, server, tools
+# SET(COMMON_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/common/src)
+
+# 4. to include external cmake packages
+# FIND_PACKAGE(FLTK   REQUIRED)
+# FIND_PACKAGE(OpenGL REQUIRED)
+
+# 5. for libthread, compile arguments matching is required
+# SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DNDEBUG -DTHERON_CPP11=1 -DTHERON_POSIX=0 -DTHERON_XS=1")
+
+# 6. add tasks to build, each in a sub-dir
+ADD_SUBDIRECTORY(client)
